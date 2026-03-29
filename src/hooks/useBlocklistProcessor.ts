@@ -2,8 +2,10 @@
 
 import { useState, useCallback, useRef } from 'react'
 import { parseBlocklist } from '@/lib/parsers'
+import { chunk, delay } from '@/lib/rate-limiter'
+import { useTranslation } from '@/lib/i18n/context'
 import type { FormData, ProcessingStats } from '@/types/blocklist'
-import type { ProgressEvent } from '@/types/api'
+import type { PushBatchResponse } from '@/types/api'
 import { useTerminalLog } from './useTerminalLog'
 
 export type ProcessingStatus = 'idle' | 'fetching' | 'parsing' | 'pushing' | 'done' | 'aborted'
@@ -17,10 +19,21 @@ export interface UseBlocklistProcessorReturn {
   reset: () => void
 }
 
+const BATCH_SIZE = 10
+const DELAY_MS = 1000
+
 function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
+/** Simple {{key}} → value interpolation. */
+function t(template: string, params: Record<string, string | number> = {}): string {
+  return Object.entries(params).reduce(
+    (s, [k, v]) => s.replace(`{{${k}}}`, String(v)),
+    template,
+  )
 }
 
 const EMPTY_STATS: ProcessingStats = {
@@ -28,6 +41,7 @@ const EMPTY_STATS: ProcessingStats = {
 }
 
 export function useBlocklistProcessor(): UseBlocklistProcessorReturn {
+  const { dict } = useTranslation()
   const { logs, addLog, clearLogs } = useTerminalLog()
   const [status, setStatus] = useState<ProcessingStatus>('idle')
   const [stats, setStats] = useState<ProcessingStats>(EMPTY_STATS)
@@ -49,11 +63,13 @@ export function useBlocklistProcessor(): UseBlocklistProcessorReturn {
     setStats(EMPTY_STATS)
     abortRef.current = new AbortController()
     const signal = abortRef.current.signal
+    const startTime = Date.now()
+    const L = dict.logs
 
     try {
-      // ─── Aşama 1: URL'den içerik çek ───────────────────────────────
+      // ── Phase 1: Fetch content ────────────────────────────────────
       setStatus('fetching')
-      addLog('info', `Blocklist URL'si alınıyor...`)
+      addLog('info', L.fetchingUrl)
       addLog('info', formData.blocklistUrl)
 
       const fetchRes = await fetch(
@@ -63,170 +79,143 @@ export function useBlocklistProcessor(): UseBlocklistProcessorReturn {
       const fetchData = await fetchRes.json()
 
       if (!fetchData.success) {
-        addLog('error', `URL alınamadı: ${fetchData.error}`)
+        addLog('error', t(L.fetchFailed, { error: fetchData.error }))
         setStatus('idle')
         return
       }
 
-      addLog('success', `İçerik alındı — ${fetchData.lineCount.toLocaleString('tr')} satır, ${formatBytes(fetchData.byteSize)}`)
+      addLog('success', t(L.contentFetched, {
+        lines: fetchData.lineCount.toLocaleString(),
+        size: formatBytes(fetchData.byteSize),
+      }))
 
-      // ─── Aşama 2: İçeriği ayrıştır ────────────────────────────────
+      // ── Phase 2: Parse ────────────────────────────────────────────
       setStatus('parsing')
-      addLog('info', `"${formData.format}" formatında ayrıştırılıyor...`)
+      addLog('info', t(L.parsing, { format: formData.format }))
 
       const domains = parseBlocklist(fetchData.content as string, formData.format)
 
       if (domains.length === 0) {
-        addLog('warning', 'Geçerli domain bulunamadı. Format seçimini kontrol edin.')
+        addLog('warning', L.noDomainsFound)
         setStatus('idle')
         return
       }
 
-      addLog('success', `${domains.length.toLocaleString('tr')} benzersiz domain bulundu`)
+      addLog('success', t(L.domainsFound, { count: domains.length.toLocaleString() }))
       setStats((s) => ({ ...s, total: domains.length }))
 
-      // ─── Aşama 3: NextDNS Denylist'e gönder (SSE) ─────────────────
+      // ── Phase 3: Push to NextDNS — batch loop on client ───────────
       setStatus('pushing')
-      addLog('start', `${domains.length.toLocaleString('tr')} domain NextDNS Denylist'e ekleniyor...`)
-      addLog('info', `Profil: ${formData.profileId} · Batch boyutu: 10 · Gecikme: 1s`)
+      addLog('start', t(L.pushingDomains, { count: domains.length.toLocaleString() }))
+      addLog('info', t(L.pushInfo, {
+        profileId: formData.profileId,
+        batchSize: BATCH_SIZE,
+        delay: (DELAY_MS / 1000).toFixed(1),
+      }))
 
-      const pushRes = await fetch('/api/push-to-nextdns', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          apiKey: formData.apiKey,
-          profileId: formData.profileId,
-          domains,
-          batchSize: 10,
-          delayMs: 1000,
-        }),
-        signal,
-      })
-
-      if (!pushRes.ok || !pushRes.body) {
-        const err = await pushRes.json().catch(() => ({ error: 'Yanıt alınamadı' }))
-        addLog('error', `API hatası: ${(err as { error: string }).error}`)
-        setStatus('idle')
-        return
-      }
-
-      // ─── SSE Stream okuma ─────────────────────────────────────────
-      const reader = pushRes.body.getReader()
-      const decoder = new TextDecoder()
-      let buffer = ''
-
-      // Mutable sayaçlar (setState'i her domain için çağırmamak için)
+      const batches = chunk(domains, BATCH_SIZE)
       let curSuccess = 0
       let curError = 0
       let curSkipped = 0
-      const total = domains.length
 
-      const handleEvent = (event: ProgressEvent) => {
-        switch (event.type) {
-          case 'domain_success':
-            curSuccess++
-            setStats({
-              total,
-              success: curSuccess,
-              error: curError,
-              skipped: curSkipped,
-              progressPercent: Math.round((event.processedCount / total) * 100),
-            })
-            break
+      for (let i = 0; i < batches.length; i++) {
+        if (signal.aborted) break
 
-          case 'domain_skipped':
-            curSkipped++
-            setStats({
-              total,
-              success: curSuccess,
-              error: curError,
-              skipped: curSkipped,
-              progressPercent: Math.round((event.processedCount / total) * 100),
-            })
-            break
+        const res = await fetch('/api/push-to-nextdns', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            apiKey: formData.apiKey,
+            profileId: formData.profileId,
+            domains: batches[i],
+          }),
+          signal,
+        })
 
-          case 'domain_error':
-            curError++
-            setStats({
-              total,
-              success: curSuccess,
-              error: curError,
-              skipped: curSkipped,
-              progressPercent: Math.round(((curSuccess + curError + curSkipped) / total) * 100),
-            })
-            addLog('error', `✗ ${event.domain}`, event.error)
-            break
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({ error: L.responseError }))
+          addLog('error', t(L.apiError, { error: (err as { error: string }).error }))
+          setStatus('idle')
+          return
+        }
 
-          case 'batch_complete':
-            addLog(
-              'info',
-              `Batch ${event.batchIndex + 1} — ` +
-              `+${event.successCount} eklendi` +
-              (event.skippedCount ? `, ${event.skippedCount} mevcut` : '') +
-              (event.errorCount ? `, ${event.errorCount} hata` : ''),
-            )
-            break
+        const data: PushBatchResponse = await res.json()
 
-          case 'rate_limit_delay':
-            addLog('delay', `Sonraki batch için ${(event.delayMs / 1000).toFixed(1)}s bekleniyor...`)
-            break
+        if (data.fatalError) {
+          addLog('error', t(L.fatalError, { error: data.fatalError.message }))
+          setStatus('idle')
+          return
+        }
 
-          case 'fatal_error':
-            addLog('error', `Kritik hata: ${event.error}`)
-            setStatus('idle')
-            break
+        let batchAdded = 0
+        let batchSkipped = 0
+        let batchErrors = 0
 
-          case 'complete':
-            addLog(
-              'complete',
-              `Tamamlandı! ` +
-              `${event.totalSuccess.toLocaleString('tr')} eklendi · ` +
-              `${event.totalSkipped.toLocaleString('tr')} zaten mevcuttu · ` +
-              `${event.totalError.toLocaleString('tr')} hata · ` +
-              `${(event.durationMs / 1000).toFixed(1)}s`,
-            )
-            setStats({
-              total,
-              success: event.totalSuccess,
-              error: event.totalError,
-              skipped: event.totalSkipped,
-              progressPercent: 100,
-            })
-            setStatus('done')
-            break
+        for (const result of data.results) {
+          if (result.status === 'added') {
+            curSuccess++; batchAdded++
+          } else if (result.status === 'skipped') {
+            curSkipped++; batchSkipped++
+          } else {
+            curError++; batchErrors++
+            addLog('error', `✗ ${result.domain}`, result.error)
+          }
+        }
+
+        const processed = curSuccess + curError + curSkipped
+        setStats({
+          total: domains.length,
+          success: curSuccess,
+          error: curError,
+          skipped: curSkipped,
+          progressPercent: Math.round((processed / domains.length) * 100),
+        })
+
+        let batchMsg = t(L.batchComplete, { n: i + 1, added: batchAdded })
+        if (batchSkipped > 0) batchMsg += t(L.alsoSkipped, { n: batchSkipped })
+        if (batchErrors > 0) batchMsg += t(L.alsoErrors, { n: batchErrors })
+        addLog('info', batchMsg)
+
+        if (!signal.aborted && i < batches.length - 1) {
+          addLog('delay', t(L.waitingNextBatch, { s: (DELAY_MS / 1000).toFixed(1) }))
+          await delay(DELAY_MS)
         }
       }
 
-      while (true) {
-        if (signal.aborted) break
-        const { done, value } = await reader.read()
-        if (done) break
-
-        buffer += decoder.decode(value, { stream: true })
-        const lines = buffer.split('\n')
-        buffer = lines.pop() ?? ''
-
-        for (const line of lines) {
-          if (!line.startsWith('data: ')) continue
-          try {
-            const event = JSON.parse(line.slice(6)) as ProgressEvent
-            handleEvent(event)
-          } catch {
-            // Bozuk satırı atla
-          }
-        }
+      // ── Completion ────────────────────────────────────────────────
+      if (signal.aborted) {
+        addLog('warning', L.aborted)
+        setStatus('aborted')
+      } else {
+        const durationMs = Date.now() - startTime
+        addLog('complete', t(L.completed, {
+          added: curSuccess.toLocaleString(),
+          skipped: curSkipped.toLocaleString(),
+          errors: curError.toLocaleString(),
+          duration: (durationMs / 1000).toFixed(1),
+        }))
+        setStats({
+          total: domains.length,
+          success: curSuccess,
+          error: curError,
+          skipped: curSkipped,
+          progressPercent: 100,
+        })
+        setStatus('done')
       }
 
     } catch (err) {
       if (err instanceof DOMException && err.name === 'AbortError') {
-        addLog('warning', 'İşlem kullanıcı tarafından iptal edildi.')
+        addLog('warning', L.aborted)
         setStatus('aborted')
       } else {
-        addLog('error', `Beklenmeyen hata: ${err instanceof Error ? err.message : 'Bilinmeyen hata'}`)
+        addLog('error', t(L.unexpectedError, {
+          error: err instanceof Error ? err.message : 'Unknown error',
+        }))
         setStatus('idle')
       }
     }
-  }, [addLog, clearLogs])
+  }, [dict, addLog, clearLogs])
 
   return { status, stats, logs, process, abort, reset }
 }

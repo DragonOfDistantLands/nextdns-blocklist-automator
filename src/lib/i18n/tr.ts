@@ -99,6 +99,27 @@ export const tr: Dictionary = {
     urlInvalid: 'Geçerli bir URL girin (https://...).',
   },
 
+  logs: {
+    fetchingUrl: "Blocklist URL'si alınıyor...",
+    contentFetched: 'İçerik alındı — {{lines}} satır, {{size}}',
+    fetchFailed: 'URL alınamadı: {{error}}',
+    parsing: '"{{format}}" formatında ayrıştırılıyor...',
+    noDomainsFound: 'Geçerli domain bulunamadı. Format seçimini kontrol edin.',
+    domainsFound: '{{count}} benzersiz domain bulundu',
+    pushingDomains: "{{count}} domain NextDNS Denylist'e ekleniyor...",
+    pushInfo: 'Profil: {{profileId}} · Batch: {{batchSize}} · Gecikme: {{delay}}s',
+    batchComplete: 'Batch {{n}} — +{{added}} eklendi',
+    alsoSkipped: ', {{n}} mevcut',
+    alsoErrors: ', {{n}} hata',
+    waitingNextBatch: 'Sonraki batch için {{s}}s bekleniyor...',
+    fatalError: 'Kritik hata: {{error}}',
+    completed: 'Tamamlandı! {{added}} eklendi · {{skipped}} zaten mevcuttu · {{errors}} hata · {{duration}}s',
+    aborted: 'İşlem kullanıcı tarafından iptal edildi.',
+    unexpectedError: 'Beklenmeyen hata: {{error}}',
+    apiError: 'API hatası: {{error}}',
+    responseError: 'Yanıt alınamadı',
+  },
+
   progress: {
     panelTitle: 'Canlı İlerleme',
     status: {

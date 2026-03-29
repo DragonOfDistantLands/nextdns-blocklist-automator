@@ -99,6 +99,27 @@ export const ru: Dictionary = {
     urlInvalid: 'Введите корректный URL (https://...).',
   },
 
+  logs: {
+    fetchingUrl: 'Загрузка URL списка блокировки...',
+    contentFetched: 'Контент получен — {{lines}} строк, {{size}}',
+    fetchFailed: 'Не удалось загрузить URL: {{error}}',
+    parsing: "Разбор в формате '{{format}}'...",
+    noDomainsFound: 'Допустимые домены не найдены. Проверьте выбор формата.',
+    domainsFound: 'Найдено {{count}} уникальных доменов',
+    pushingDomains: 'Добавление {{count}} доменов в NextDNS Denylist...',
+    pushInfo: 'Профиль: {{profileId}} · Пакет: {{batchSize}} · Задержка: {{delay}}с',
+    batchComplete: 'Пакет {{n}} — +{{added}} добавлено',
+    alsoSkipped: ', {{n}} существует',
+    alsoErrors: ', {{n}} ошибок',
+    waitingNextBatch: 'Ожидание {{s}}с перед следующим пакетом...',
+    fatalError: 'Критическая ошибка: {{error}}',
+    completed: 'Готово! {{added}} добавлено · {{skipped}} уже существовало · {{errors}} ошибок · {{duration}}с',
+    aborted: 'Операция отменена пользователем.',
+    unexpectedError: 'Непредвиденная ошибка: {{error}}',
+    apiError: 'Ошибка API: {{error}}',
+    responseError: 'Ответ не получен',
+  },
+
   progress: {
     panelTitle: 'Прогресс в реальном времени',
     status: {

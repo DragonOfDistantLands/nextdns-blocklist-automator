@@ -99,6 +99,27 @@ export const zh: Dictionary = {
     urlInvalid: '请输入有效的 URL（https://...）。',
   },
 
+  logs: {
+    fetchingUrl: '正在获取屏蔽列表 URL...',
+    contentFetched: '内容已获取 — {{lines}} 行，{{size}}',
+    fetchFailed: '无法获取 URL：{{error}}',
+    parsing: "正在以 '{{format}}' 格式解析...",
+    noDomainsFound: '未找到有效域名，请检查格式选择。',
+    domainsFound: '找到 {{count}} 个唯一域名',
+    pushingDomains: '正在将 {{count}} 个域名添加到 NextDNS 拒绝列表...',
+    pushInfo: '配置文件：{{profileId}} · 批次：{{batchSize}} · 延迟：{{delay}}s',
+    batchComplete: '批次 {{n}} — 已添加 +{{added}}',
+    alsoSkipped: '，{{n}} 个已存在',
+    alsoErrors: '，{{n}} 个错误',
+    waitingNextBatch: '等待 {{s}}s 后处理下一批次...',
+    fatalError: '严重错误：{{error}}',
+    completed: '完成！{{added}} 已添加 · {{skipped}} 已存在 · {{errors}} 错误 · {{duration}}s',
+    aborted: '操作已被用户取消。',
+    unexpectedError: '意外错误：{{error}}',
+    apiError: 'API 错误：{{error}}',
+    responseError: '未收到响应',
+  },
+
   progress: {
     panelTitle: '实时进度',
     status: {

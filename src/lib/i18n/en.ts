@@ -99,6 +99,27 @@ export const en: Dictionary = {
     urlInvalid: 'Enter a valid URL (https://...).',
   },
 
+  logs: {
+    fetchingUrl: 'Fetching blocklist URL...',
+    contentFetched: 'Content fetched — {{lines}} lines, {{size}}',
+    fetchFailed: 'Failed to fetch URL: {{error}}',
+    parsing: "Parsing as '{{format}}'...",
+    noDomainsFound: 'No valid domains found. Check the format selection.',
+    domainsFound: '{{count}} unique domains found',
+    pushingDomains: 'Adding {{count}} domains to NextDNS Denylist...',
+    pushInfo: 'Profile: {{profileId}} · Batch: {{batchSize}} · Delay: {{delay}}s',
+    batchComplete: 'Batch {{n}} — +{{added}} added',
+    alsoSkipped: ', {{n}} existing',
+    alsoErrors: ', {{n}} errors',
+    waitingNextBatch: 'Waiting {{s}}s for next batch...',
+    fatalError: 'Fatal error: {{error}}',
+    completed: 'Done! {{added}} added · {{skipped}} existing · {{errors}} errors · {{duration}}s',
+    aborted: 'Operation cancelled by user.',
+    unexpectedError: 'Unexpected error: {{error}}',
+    apiError: 'API error: {{error}}',
+    responseError: 'No response received',
+  },
+
   progress: {
     panelTitle: 'Live Progress',
     status: {

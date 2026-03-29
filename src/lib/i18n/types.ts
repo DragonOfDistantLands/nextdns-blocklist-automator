@@ -76,6 +76,27 @@ export interface Dictionary {
     urlInvalid: string
   }
 
+  logs: {
+    fetchingUrl: string
+    contentFetched: string
+    fetchFailed: string
+    parsing: string
+    noDomainsFound: string
+    domainsFound: string
+    pushingDomains: string
+    pushInfo: string
+    batchComplete: string
+    alsoSkipped: string
+    alsoErrors: string
+    waitingNextBatch: string
+    fatalError: string
+    completed: string
+    aborted: string
+    unexpectedError: string
+    apiError: string
+    responseError: string
+  }
+
   progress: {
     panelTitle: string
     status: {

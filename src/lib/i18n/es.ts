@@ -99,6 +99,27 @@ export const es: Dictionary = {
     urlInvalid: 'Ingresa una URL válida (https://...).',
   },
 
+  logs: {
+    fetchingUrl: 'Obteniendo URL de la lista de bloqueo...',
+    contentFetched: 'Contenido obtenido — {{lines}} líneas, {{size}}',
+    fetchFailed: 'No se pudo obtener la URL: {{error}}',
+    parsing: "Analizando con formato '{{format}}'...",
+    noDomainsFound: 'No se encontraron dominios válidos. Verifica el formato seleccionado.',
+    domainsFound: '{{count}} dominios únicos encontrados',
+    pushingDomains: 'Agregando {{count}} dominios a NextDNS Denylist...',
+    pushInfo: 'Perfil: {{profileId}} · Lote: {{batchSize}} · Espera: {{delay}}s',
+    batchComplete: 'Lote {{n}} — +{{added}} agregados',
+    alsoSkipped: ', {{n}} existentes',
+    alsoErrors: ', {{n}} errores',
+    waitingNextBatch: 'Esperando {{s}}s para el siguiente lote...',
+    fatalError: 'Error fatal: {{error}}',
+    completed: '¡Listo! {{added}} agregados · {{skipped}} existentes · {{errors}} errores · {{duration}}s',
+    aborted: 'Operación cancelada por el usuario.',
+    unexpectedError: 'Error inesperado: {{error}}',
+    apiError: 'Error de API: {{error}}',
+    responseError: 'No se recibió respuesta',
+  },
+
   progress: {
     panelTitle: 'Progreso en Vivo',
     status: {
