@@ -17,16 +17,31 @@ This project provides a 100% client-side, secure, and blazing-fast way to proces
 * **Dark Mode & i18n:** Fully supports Dark/Light mode and comes with built-in translations for English (EN), Turkish (TR), Russian (RU), Chinese (ZH), and Spanish (ES).
 * **Privacy First (Client-Side):** Your NextDNS API key and Profile ID are never stored on any server. All processing and API calls happen directly within your browser.
 
-## 🚀 Getting Started (Local Development)
+## 🚀 How to Use (Getting Started)
 
-First, install the dependencies and run the development server:
+You have two ways to use the NextDNS Blocklist Automator:
 
+### Option 1: Use the Live Version (Recommended)
+You don't need to install anything. The project is securely hosted on Cloudflare Pages and runs entirely in your browser.
+
+🌐 **Launch the App:** [https://nextdns-blocklist-automator.dragon-tools.workers.dev/](https://nextdns-blocklist-automator.dragon-tools.workers.dev/)
+
+### Option 2: Run Locally (For Developers)
+If you prefer to run the application on your own machine or want to contribute to the code:
+
+1. Clone the repository and install the dependencies:
 ```bash
+git clone [https://github.com/DragonOfDistantLands/nextdns-blocklist-automator.git](https://github.com/DragonOfDistantLands/nextdns-blocklist-automator.git)
+cd nextdns-blocklist-automator
 npm install
+```
+
+2. Start the development server:
+```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the application.
+3. Open your browser and navigate to: [http://localhost:3000](http://localhost:3000)
 
 ## 🛠️ Tech Stack
 
