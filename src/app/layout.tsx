@@ -21,11 +21,45 @@ const mulish = Mulish({
   weight: ['400', '500', '600', '700', '800'],
 })
 
+const SITE_URL = 'https://nextdns-blocklist-automator.dragon-tools.workers.dev'
+const SITE_NAME = 'NextDNS Blocklist Automator'
+const DESCRIPTION =
+  'A sleek, client-side, fault-tolerant tool to automatically sync massive external domain blocklists (Adblock, Hosts, Dnsmasq) directly to your NextDNS Denylist.'
+
 export const metadata: Metadata = {
-  title: 'NextDNS Blocklist Automator',
-  description:
-    'Automatically add external ad/tracker blocklists to your NextDNS account.',
-  keywords: ['nextdns', 'blocklist', 'denylist', 'adblock', 'dns'],
+  title: {
+    template: `%s | ${SITE_NAME}`,
+    default: `${SITE_NAME} | Sync Custom Filters`,
+  },
+  description: DESCRIPTION,
+  keywords: [
+    'NextDNS',
+    'blocklist',
+    'adblock',
+    'dnsmasq',
+    'hosts',
+    'hagezi',
+    'oisd',
+    'privacy',
+    'network security',
+    'denylist automator',
+  ],
+  authors: [
+    { name: 'DragonOfDistantLands', url: 'https://github.com/DragonOfDistantLands' },
+  ],
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: SITE_URL,
+    siteName: SITE_NAME,
+    title: `${SITE_NAME} | Sync Custom Filters`,
+    description: DESCRIPTION,
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: `${SITE_NAME} | Sync Custom Filters`,
+    description: DESCRIPTION,
+  },
   icons: {
     icon: '/favicon.svg',
     shortcut: '/favicon.svg',
