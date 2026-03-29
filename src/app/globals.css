@@ -10,6 +10,7 @@
   --font-sans: var(--font-sans);
   --font-mono: var(--font-geist-mono);
   --font-heading: var(--font-sans);
+  --font-nextdns: var(--font-mulish);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -127,4 +128,66 @@
   html {
     @apply font-sans;
   }
+}
+
+/* Terminal log ekranı için özel stiller */
+.terminal-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.terminal-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.terminal-scrollbar::-webkit-scrollbar-thumb {
+  background: oklch(0.3 0 0);
+  border-radius: 3px;
+}
+.terminal-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.4 0 0);
+}
+
+/* ── Logo animasyonu (Header) ─────────────────────────────────── */
+@keyframes fade-in-down {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.logo-animate {
+  animation: fade-in-down 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ── Hero metni animasyonu ────────────────────────────────────── */
+@keyframes hero-fade {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.hero-animate {
+  animation: hero-fade 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.hero-animate-delay {
+  animation: hero-fade 0.6s 0.1s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ── Terminal log slide-up animasyonu ────────────────────────── */
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(5px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.log-entry-animate {
+  animation: slide-up 0.18s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ── Progress bar akıcı geçiş ─────────────────────────────────── */
+@keyframes progress-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.75; }
+}
+.progress-bar-active {
+  animation: progress-pulse 2s ease-in-out infinite;
+}
+
+/* ── Status indicator nokta ───────────────────────────────────── */
+@keyframes status-ping {
+  75%, 100% { transform: scale(2); opacity: 0; }
+}
+.status-ping {
+  animation: status-ping 1.2s cubic-bezier(0, 0, 0.2, 1) infinite;
 }

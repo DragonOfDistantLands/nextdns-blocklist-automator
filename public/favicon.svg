@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <defs>
+    <!-- Shield gradient: NextDNS blue → deep indigo -->
+    <linearGradient id="shieldGrad" x1="4" y1="2" x2="28" y2="30" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1e90ff"/>
+      <stop offset="55%" stop-color="#1472D1"/>
+      <stop offset="100%" stop-color="#4338ca"/>
+    </linearGradient>
+
+    <!-- Glow filter for broken chain ends -->
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="1.2" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Inner shield highlight -->
+    <linearGradient id="shineGrad" x1="4" y1="2" x2="16" y2="18" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="white" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="white" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Shield body -->
+  <path
+    d="M16 2L3 7.5v7.8C3 21.6 8.7 28 16 30 23.3 28 29 21.6 29 15.3V7.5L16 2Z"
+    fill="url(#shieldGrad)"
+  />
+
+  <!-- Shield inner shine -->
+  <path
+    d="M16 2L3 7.5v7.8C3 21.6 8.7 28 16 30 23.3 28 29 21.6 29 15.3V7.5L16 2Z"
+    fill="url(#shineGrad)"
+  />
+
+  <!-- Shield border -->
+  <path
+    d="M16 2L3 7.5v7.8C3 21.6 8.7 28 16 30 23.3 28 29 21.6 29 15.3V7.5L16 2Z"
+    stroke="white"
+    stroke-opacity="0.25"
+    stroke-width="0.6"
+    fill="none"
+  />
+
+  <!-- Broken chain — left segment (tilted, upper-left area) -->
+  <!-- Link body -->
+  <g filter="url(#glow)" stroke="white" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Left chain link: upper-left, angled -35deg -->
+    <rect x="7.5" y="10.5" width="5.8" height="3.2" rx="1.6"
+      fill="none" stroke-width="1.5"
+      transform="rotate(-35 10.4 12.1)"/>
+
+    <!-- Right chain link: lower-right, angled -35deg, separated by ~2.5px gap -->
+    <rect x="18.5" y="17.5" width="5.8" height="3.2" rx="1.6"
+      fill="none" stroke-width="1.5"
+      transform="rotate(-35 21.4 19.1)"/>
+
+    <!-- Broken link left — glowing fractured end, upper-left -->
+    <line x1="12.2" y1="10.4" x2="13.8" y2="12.8" stroke-width="1.8" stroke="#7dd3fc"/>
+    <line x1="12.2" y1="10.4" x2="14.2" y2="10.0" stroke-width="1.2" stroke="#bfdbfe" stroke-opacity="0.7"/>
+
+    <!-- Broken link right — glowing fractured end, lower-right -->
+    <line x1="19.8" y1="21.0" x2="18.2" y2="18.6" stroke-width="1.8" stroke="#7dd3fc"/>
+    <line x1="19.8" y1="21.0" x2="17.8" y2="21.4" stroke-width="1.2" stroke="#bfdbfe" stroke-opacity="0.7"/>
+
+    <!-- Spark dots at break point — left side -->
+    <circle cx="14.4" cy="13.5" r="0.9" fill="#38bdf8" stroke="none"/>
+    <circle cx="13.0" cy="14.8" r="0.5" fill="#bae6fd" stroke="none" fill-opacity="0.7"/>
+
+    <!-- Spark dots at break point — right side -->
+    <circle cx="17.6" cy="18.0" r="0.9" fill="#38bdf8" stroke="none"/>
+    <circle cx="19.0" cy="16.7" r="0.5" fill="#bae6fd" stroke="none" fill-opacity="0.7"/>
+  </g>
+</svg>
