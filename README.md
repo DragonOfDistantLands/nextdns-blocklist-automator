@@ -40,8 +40,8 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 If you find this open-source tool useful for managing your network privacy, consider supporting the development. You can buy me a coffee via crypto:
 
-* **USDT (BEP20 / BSC):** `YOUR_BSC_ADDRESS_HERE`
-* **USDT (Solana / SPL):** `YOUR_SOLANA_ADDRESS_HERE`
+* **USDT (BEP20 / BSC):** `0xd8F29d8F4f2346b14C78Fe36Eaebb5A434B890B6`
+* **USDT (Solana / SPL):** `7kitvtMt6Ep3dz3UqexPPR4JzJBPfm28QtfTkK3LeSMU`
 
 *(Note: Please ensure you are sending on the correct network to avoid loss of funds.)*
 
